@@ -150,6 +150,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// Moves the dropdown view so that it appears on top of all other subviews in presenting view.
 - (void)bringDropdownViewToFront;
 
+/// Set footer view.
+- (void)setFooterView:(UIView *)footerView;
+
 @end
 
 

@@ -369,6 +369,7 @@ static UIImage *disclosureIndicatorImage = nil;
 @property (assign, nonatomic) NSInteger maxRows;
 @property (readonly, nonatomic) CGFloat maxHeight;
 @property (readonly, nonatomic) CGFloat contentHeight;
+@property (strong, nonatomic) UIView *footerView;
 
 @end
 
@@ -444,7 +445,6 @@ static UIImage *disclosureIndicatorImage = nil;
     
     [self.tableView registerClass:[MKDropdownMenuTableViewCell class] forCellReuseIdentifier:kCellIdentifier];
     
-    
     // Shadow
     
     self.shadowView = [UIView new];
@@ -455,7 +455,6 @@ static UIImage *disclosureIndicatorImage = nil;
     self.shadowView.layer.shadowColor = [[UIColor blackColor] CGColor];
     self.shadowView.layer.shadowOpacity = kShadowOpacity;
     self.shadowView.layer.shadowRadius = kDefaultCornerRadius;
-    
     
     // Separator
     
@@ -658,7 +657,10 @@ static UIImage *disclosureIndicatorImage = nil;
 - (void)updateData {
     self.rowsCount = [self.delegate numberOfRows];
     self.maxRows = [self.delegate maximumNumberOfRows];
+    
     [self updateContainerHeight];
+    
+    
     [self.tableView reloadData];
 }
 
@@ -795,14 +797,35 @@ static UIImage *disclosureIndicatorImage = nil;
 #pragma mark - UITableView
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if (self.footerView != nil) {
+        return self.rowsCount + 1;
+    }
     return self.rowsCount;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row == self.rowsCount && self.footerView != nil) {
+        return self.footerView.frame.size.height;
+    }
+    return tableView.rowHeight;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     MKDropdownMenuTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellIdentifier forIndexPath:indexPath];
     
     UIView *customView = cell.currentCustomView;
-    customView = [self.delegate customViewForRow:indexPath.row reusingView:customView];
+    
+    if (indexPath.row == self.rowsCount && self.footerView != nil) {
+        customView = self.footerView;
+        [cell setCustomView:customView];
+        cell.preservesSuperviewLayoutMargins = NO;
+        cell.layoutMargins = UIEdgeInsetsZero;
+        cell.separatorInset = UIEdgeInsetsZero;
+        return cell;
+    }
+    else {
+        customView = [self.delegate customViewForRow:indexPath.row reusingView:customView];
+    }
     
     [cell setCustomView:customView];
     if (customView == nil) {
@@ -1040,6 +1063,7 @@ static const CGFloat kScrollViewBottomSpace = 5;
 @property (strong, nonatomic) NSMutableArray<NSNumber *> *components;
 @property (assign, nonatomic) NSInteger selectedComponent;
 @property (strong, nonatomic) NSMutableArray<NSMutableIndexSet *> *selectedRows;
+@property (strong, nonatomic) UIView *footerView;
 
 @end
 
@@ -1563,6 +1587,11 @@ static const CGFloat kScrollViewBottomSpace = 5;
 
 - (void)bringDropdownViewToFront {
     [self.contentViewController.view.superview bringSubviewToFront:self.contentViewController.view];
+}
+
+- (void)setFooterView:(UIView *)footerView {
+    self.contentViewController.footerView = footerView;
+    [self.contentViewController.tableView reloadData];
 }
 
 #pragma mark - Private

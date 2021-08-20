@@ -47,15 +47,12 @@ NS_ENUM(NSInteger, DropdownComponents) {
     
     self.dropdownMenu.backgroundDimmingOpacity = 0.05;
     
-    
     // Set up shape view
-    
     self.shapeView.sidesCount = 2;
     self.shapeView.fillColor = [UIColor lightGrayColor];
     self.shapeView.strokeColor = [UIColor darkGrayColor];
     self.shapeView.lineWidth = 1;
 }
-
 #pragma mark - MKDropdownMenuDataSource
 
 - (NSInteger)numberOfComponentsInDropdownMenu:(MKDropdownMenu *)dropdownMenu {
